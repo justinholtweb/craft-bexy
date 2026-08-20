@@ -1,0 +1,111 @@
+{% extends '_layouts/cp' %}
+{% import '_includes/forms' as forms %}
+
+{% set title = 'Log'|t('bexy') %}
+{% set selectedSubnavItem = 'log' %}
+
+{% set crumbs = [
+    { label: 'Bexy'|t('bexy'), url: url('bexy') },
+] %}
+
+{% block content %}
+    <form method="get" class="pane" style="display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap;">
+        {% set actionOptions = [{ label: 'Any action'|t('bexy'), value: '' }] %}
+        {% for action in actions %}
+            {% set actionOptions = actionOptions|merge([{ label: action, value: action }]) %}
+        {% endfor %}
+
+        {{ forms.select({
+            name: 'level',
+            value: criteria.level,
+            options: [
+                { label: 'Any level'|t('bexy'), value: '' },
+                { label: 'Info'|t('bexy'), value: 'info' },
+                { label: 'Warning'|t('bexy'), value: 'warning' },
+                { label: 'Error'|t('bexy'), value: 'error' },
+            ]
+        }) }}
+        {{ forms.select({ name: 'action', value: criteria.action, options: actionOptions }) }}
+        {{ forms.text({ name: 'search', value: criteria.search, placeholder: 'Search'|t('bexy') }) }}
+        <button type="submit" class="btn submit">{{ 'Filter'|t('bexy') }}</button>
+    </form>
+
+    {% if entries|length %}
+        <table class="data fullwidth">
+            <thead>
+                <tr>
+                    <th style="width: 24px;"></th>
+                    <th>{{ 'When'|t('bexy') }}</th>
+                    <th>{{ 'Action'|t('bexy') }}</th>
+                    <th>{{ 'Summary'|t('bexy') }}</th>
+                    <th class="rightalign">{{ 'Status'|t('bexy') }}</th>
+                    <th class="rightalign">{{ 'Time'|t('bexy') }}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for entry in entries %}
+                    <tr>
+                        <td><span class="status {{ entry.getStatusColor() }}"></span></td>
+                        <td><a href="{{ url('bexy/log/' ~ entry.id) }}">{{ entry.dateCreated|datetime('short') }}</a></td>
+                        <td><code>{{ entry.action }}</code></td>
+                        <td>
+                            {{ entry.summary }}
+                            {% if entry.message %}
+                                <div class="light smalltext">{{ entry.message|slice(0, 160) }}</div>
+                            {% endif %}
+                        </td>
+                        <td class="rightalign">{{ entry.statusCode ?: '—' }}</td>
+                        <td class="rightalign">{{ entry.durationMs ? entry.durationMs ~ ' ms' : '—' }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        {% set pages = (total / perPage)|round(0, 'ceil') %}
+        {% if pages > 1 %}
+            <div class="pane" style="display: flex; gap: 8px; align-items: center;">
+                {% if page > 1 %}
+                    <a class="btn" href="{{ url('bexy/log', craft.app.request.queryParams|merge({ page: page - 1 })) }}">{{ '← Previous'|t('bexy') }}</a>
+                {% endif %}
+                <span class="light">{{ 'Page {page} of {pages}'|t('bexy', { page: page, pages: pages }) }}</span>
+                {% if page < pages %}
+                    <a class="btn" href="{{ url('bexy/log', craft.app.request.queryParams|merge({ page: page + 1 })) }}">{{ 'Next →'|t('bexy') }}</a>
+                {% endif %}
+            </div>
+        {% endif %}
+
+        {% if currentUser.admin %}
+            <div class="pane">
+                <button type="button" class="btn" id="bexy-clear-log">{{ 'Clear the log'|t('bexy') }}</button>
+            </div>
+
+            {% js %}
+            document.getElementById('bexy-clear-log').addEventListener('click', function() {
+                if (!confirm(Craft.t('bexy', 'Delete every log entry?'))) { return; }
+
+                var form = document.createElement('form');
+                form.method = 'post';
+                form.action = '';
+
+                var add = function(name, value) {
+                    var input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = name;
+                    input.value = value;
+                    form.appendChild(input);
+                };
+
+                add('action', 'bexy/log/clear');
+                add(Craft.csrfTokenName, Craft.csrfTokenValue);
+
+                document.body.appendChild(form);
+                form.submit();
+            });
+            {% endjs %}
+        {% endif %}
+    {% else %}
+        <div class="pane">
+            <p class="light">{{ 'Nothing logged yet.'|t('bexy') }}</p>
+        </div>
+    {% endif %}
+{% endblock %}

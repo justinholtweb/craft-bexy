@@ -1,0 +1,73 @@
+{% extends '_layouts/cp' %}
+
+{% set title = entry.summary ?: entry.action %}
+{% set selectedSubnavItem = 'log' %}
+
+{% set crumbs = [
+    { label: 'Bexy'|t('bexy'), url: url('bexy') },
+    { label: 'Log'|t('bexy'), url: url('bexy/log') },
+] %}
+
+{% block content %}
+    <div class="pane">
+        <table class="data fullwidth">
+            <tbody>
+                <tr>
+                    <th style="width: 200px;">{{ 'When'|t('bexy') }}</th>
+                    <td>{{ entry.dateCreated|datetime('long') }}</td>
+                </tr>
+                <tr>
+                    <th>{{ 'Action'|t('bexy') }}</th>
+                    <td><code>{{ entry.action }}</code></td>
+                </tr>
+                <tr>
+                    <th>{{ 'Request'|t('bexy') }}</th>
+                    <td>
+                        {% if entry.method %}<code>{{ entry.method }} {{ entry.endpoint }}</code>{% else %}—{% endif %}
+                    </td>
+                </tr>
+                <tr>
+                    <th>{{ 'Status'|t('bexy') }}</th>
+                    <td>
+                        <span class="status {{ entry.getStatusColor() }}"></span>
+                        {{ entry.statusCode ?: entry.level }}
+                        {% if entry.durationMs %}<span class="light">· {{ entry.durationMs }} ms</span>{% endif %}
+                    </td>
+                </tr>
+                {% if entry.orderId %}
+                    <tr>
+                        <th>{{ 'Order'|t('bexy') }}</th>
+                        <td>
+                            {% set order = craft.orders().id(entry.orderId).status(null).one() %}
+                            {% if order %}
+                                <a href="{{ order.getCpEditUrl() }}">{{ order.reference ?: order.number }}</a>
+                            {% else %}
+                                #{{ entry.orderId }}
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endif %}
+                {% if entry.message %}
+                    <tr>
+                        <th>{{ 'Message'|t('bexy') }}</th>
+                        <td style="white-space: pre-wrap;">{{ entry.message }}</td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+
+    {% if entry.request %}
+        <h2>{{ 'Sent'|t('bexy') }}</h2>
+        <div class="pane">
+            <pre style="max-height: 400px; overflow: auto;"><code>{{ entry.formatted(entry.request) }}</code></pre>
+        </div>
+    {% endif %}
+
+    {% if entry.response %}
+        <h2>{{ 'Received'|t('bexy') }}</h2>
+        <div class="pane">
+            <pre style="max-height: 400px; overflow: auto;"><code>{{ entry.formatted(entry.response) }}</code></pre>
+        </div>
+    {% endif %}
+{% endblock %}

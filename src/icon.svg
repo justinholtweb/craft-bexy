@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" role="img" aria-label="Bexy">
+    <!-- A receipt: the torn bottom edge is what makes it read as a booked document rather than
+         a generic page, at 16px as well as at 200. -->
+    <path fill="currentColor"
+          d="M22 8h56a4 4 0 0 1 4 4v78.6a1.6 1.6 0 0 1-2.4 1.38L69.6 85.6a3.2 3.2 0 0 0-3.2 0L56 91.72a3.2 3.2 0 0 1-3.2 0L42.4 85.6a3.2 3.2 0 0 0-3.2 0L28.8 91.72a3.2 3.2 0 0 1-3.2 0l-6.4-3.7A1.6 1.6 0 0 1 18 86.6V12a4 4 0 0 1 4-4Zm0 8v68.7l3.6 2.08 9.2-5.32a9.6 9.6 0 0 1 9.6 0l8.8 5.08 8.8-5.08a9.6 9.6 0 0 1 9.6 0L76 85.5V16H22Z"/>
+    <!-- Two ledger lines and a tick: entered, and agreed. -->
+    <rect fill="currentColor" x="31" y="28" width="38" height="7" rx="3.5"/>
+    <rect fill="currentColor" x="31" y="43" width="24" height="7" rx="3.5"/>
+    <path fill="currentColor"
+          d="M45.9 71.4a4.5 4.5 0 0 1-3.2-1.32l-9.2-9.2a4.5 4.5 0 1 1 6.37-6.36l6.03 6.03 20.63-20.63a4.5 4.5 0 0 1 6.37 6.36L49.1 70.08a4.5 4.5 0 0 1-3.2 1.32Z"/>
+</svg>

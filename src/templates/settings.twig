@@ -1,0 +1,665 @@
+{# Field names carry no `settings[…]` prefix: `craft\base\Plugin::settingsResponse()` runs this
+   template's output through `View::namespaceInputs(…, 'settings')`, so a name written as
+   `settings[foo]` here posts as `settings[settings][foo]` and saves nothing at all — the screen
+   looks correct, Craft reports "Plugin settings saved", and every edit is silently discarded. #}
+{% import '_includes/forms' as forms %}
+
+{% set plugin = plugin ?? craft.app.plugins.getPlugin('bexy') %}
+{% set auth = plugin.auth %}
+{% set meta = plugin.meta %}
+{% set commerceReady = craft.app.plugins.isPluginEnabled('commerce') %}
+{% set connected = auth.isConnected() %}
+{% set tokenSet = auth.getTokenSet() %}
+
+{% set taxOptions = meta.getTaxOptions() %}
+{% set accountOptions = meta.getAccountOptions() %}
+{% set userOptions = meta.getUserOptions() %}
+
+{% set taxCategoryOptions = [{ label: '— any —'|t('bexy'), value: '' }] %}
+{% set orderStatusOptions = [{ label: '— none —'|t('bexy'), value: '' }] %}
+{% set syncStatusOptions = [] %}
+{% if commerceReady %}
+    {% for category in craft.app.plugins.getPlugin('commerce').getTaxCategories().getAllTaxCategories() %}
+        {% set taxCategoryOptions = taxCategoryOptions|merge([{ label: category.name, value: category.handle }]) %}
+    {% endfor %}
+    {% for status in craft.app.plugins.getPlugin('commerce').getOrderStatuses().getAllOrderStatuses() %}
+        {% set orderStatusOptions = orderStatusOptions|merge([{ label: status.name, value: status.handle }]) %}
+        {% set syncStatusOptions = syncStatusOptions|merge([{ label: status.name, value: status.handle }]) %}
+    {% endfor %}
+{% endif %}
+
+{% if not commerceReady %}
+    <div class="pane">
+        <p class="error">{{ 'Craft Commerce is not installed or enabled. Bexy needs it to do anything.'|t('bexy') }}</p>
+    </div>
+{% endif %}
+
+{# ------------------------------------------------------------------ #}
+<h2>{{ 'Connection'|t('bexy') }}</h2>
+
+<div class="pane">
+    {% if connected %}
+        <p>
+            <span class="status green"></span>
+            {% if tokenSet and tokenSet.companyName %}
+                {{ 'Connected to {company}'|t('bexy', { company: tokenSet.companyName }) }}
+                {%- if tokenSet.userEmail %} {{ '(as {email})'|t('bexy', { email: tokenSet.userEmail }) }}{% endif %}
+            {% else %}
+                {{ 'Connected to bexio.'|t('bexy') }}
+            {% endif %}
+        </p>
+        {% if tokenSet and tokenSet.dateExpires %}
+            <p class="light">
+                {{ 'Access token expires {date}. Bexy refreshes it automatically.'|t('bexy', {
+                    date: tokenSet.dateExpires|datetime('short')
+                }) }}
+            </p>
+        {% endif %}
+    {% else %}
+        <p><span class="status"></span> {{ 'Not connected.'|t('bexy') }}</p>
+    {% endif %}
+
+    <div id="bexy-test-result" class="light" style="margin-top: 8px;"></div>
+
+    <p style="margin-top: 12px;">
+        <button type="button" class="btn" id="bexy-test">{{ 'Test connection'|t('bexy') }}</button>
+        <button type="button" class="btn" id="bexy-refresh-meta">{{ 'Refresh lists from bexio'|t('bexy') }}</button>
+        {% if connected %}
+            <button type="button" class="btn" id="bexy-disconnect">{{ 'Disconnect'|t('bexy') }}</button>
+        {% endif %}
+    </p>
+</div>
+
+{{ forms.selectField({
+    label: 'Authentication'|t('bexy'),
+    instructions: 'A personal access token is one paste and starts working immediately — and bexio expires it 60 days after it was created, silently. The authorization code flow takes more setting up and then stays connected.'|t('bexy'),
+    id: 'authMode',
+    name: 'authMode',
+    value: settings.authMode,
+    options: [
+        { label: 'OAuth 2.0 (recommended)'|t('bexy'), value: 'oauth' },
+        { label: 'Personal access token'|t('bexy'), value: 'pat' },
+    ],
+    toggle: true,
+    targetPrefix: 'auth-',
+}) }}
+
+<div id="auth-oauth" class="{{ settings.authMode == 'oauth' ? '' : 'hidden' }}">
+    <div class="pane">
+        <p>{{ 'Create an app at {link}, paste its credentials below, and register this redirect URL against it.'|t('bexy', {
+            link: '<a href="https://developer.bexio.com" rel="noopener" target="_blank">developer.bexio.com</a>'
+        })|raw }}</p>
+
+        {{ forms.textField({
+            label: 'Redirect URL'|t('bexy'),
+            instructions: 'Copy this into the app’s “Allowed redirect URL” field in bexio.'|t('bexy'),
+            id: 'bexy-redirect-uri',
+            value: auth.getRedirectUri(),
+            readonly: true,
+            class: 'code',
+        }) }}
+    </div>
+
+    {{ forms.autosuggestField({
+        label: 'Client ID'|t('bexy'),
+        id: 'clientId',
+        name: 'clientId',
+        value: settings.clientId,
+        suggestEnvVars: true,
+    }) }}
+
+    {{ forms.autosuggestField({
+        label: 'Client secret'|t('bexy'),
+        instructions: 'Store this in an environment variable rather than in project config.'|t('bexy'),
+        id: 'clientSecret',
+        name: 'clientSecret',
+        value: settings.clientSecret,
+        suggestEnvVars: true,
+    }) }}
+
+    {% if not connected %}
+        <div class="field">
+            <p class="light">{{ 'Save the client ID and secret first, then connect.'|t('bexy') }}</p>
+            <button type="button" class="btn submit" id="bexy-connect">{{ 'Connect to bexio'|t('bexy') }}</button>
+        </div>
+    {% endif %}
+</div>
+
+<div id="auth-pat" class="{{ settings.authMode == 'pat' ? '' : 'hidden' }}">
+    {{ forms.autosuggestField({
+        label: 'Personal access token'|t('bexy'),
+        instructions: 'From {link}. bexio expires every token 60 days after it is issued, and will not warn you — put a reminder in the diary.'|t('bexy', {
+            link: '<a href="https://developer.bexio.com/pat" rel="noopener" target="_blank">developer.bexio.com/pat</a>'
+        }),
+        id: 'personalAccessToken',
+        name: 'personalAccessToken',
+        value: settings.personalAccessToken,
+        suggestEnvVars: true,
+    }) }}
+</div>
+
+{# ------------------------------------------------------------------ #}
+<hr>
+<h2>{{ 'What to create'|t('bexy') }}</h2>
+
+{{ forms.selectField({
+    label: 'Document type'|t('bexy'),
+    instructions: 'Invoices can be issued, emailed and paid. Orders are the pre-invoice stage, and payments cannot be posted against them.'|t('bexy'),
+    id: 'documentType',
+    name: 'documentType',
+    value: settings.documentType,
+    options: [
+        { label: 'Invoice'|t('bexy'), value: 'invoice' },
+        { label: 'Order'|t('bexy'), value: 'order' },
+    ],
+}) }}
+
+{{ forms.lightswitchField({
+    label: 'Send orders automatically'|t('bexy'),
+    instructions: 'Queues a push when an order completes. The push itself always runs on the queue, so bexio can never hold up a checkout.'|t('bexy'),
+    id: 'autoSync',
+    name: 'autoSync',
+    on: settings.autoSync,
+}) }}
+
+{{ forms.checkboxSelectField({
+    label: 'Only when the order reaches'|t('bexy'),
+    instructions: 'Leave all of these unchecked to push as soon as an order completes. Tick one or more to wait until somebody moves the order there instead.'|t('bexy'),
+    id: 'syncOnStatuses',
+    name: 'syncOnStatuses',
+    values: settings.syncOnStatuses,
+    options: syncStatusOptions,
+    showAllOption: false,
+}) }}
+
+{{ forms.lightswitchField({
+    label: 'Issue the invoice'|t('bexy'),
+    instructions: 'Books it and gives it a number. Until then it is a draft in bexio and cannot be emailed or paid.'|t('bexy'),
+    id: 'issueDocument',
+    name: 'issueDocument',
+    on: settings.issueDocument,
+}) }}
+
+{{ forms.lightswitchField({
+    label: 'Have bexio email it'|t('bexy'),
+    instructions: 'Sends from bexio’s own delivery network, not Craft’s.'|t('bexy'),
+    id: 'sendDocument',
+    name: 'sendDocument',
+    on: settings.sendDocument,
+}) }}
+
+{{ forms.textField({
+    label: 'Email subject'|t('bexy'),
+    id: 'emailSubject',
+    name: 'emailSubject',
+    value: settings.emailSubject,
+}) }}
+
+{{ forms.textareaField({
+    label: 'Email body'|t('bexy'),
+    instructions: 'bexio puts the document where `[Network Link]` appears. Without that placeholder the customer gets an email with no invoice in it. `{number}`, `{name}` and `{email}` are also replaced.'|t('bexy'),
+    id: 'emailBody',
+    name: 'emailBody',
+    value: settings.emailBody,
+    rows: 6,
+}) }}
+
+{{ forms.textField({
+    label: 'Document title'|t('bexy'),
+    instructions: 'Tokens: `{number}`, `{reference}`, `{date}`, `{total}`, `{currency}`, `{name}`, `{email}`.'|t('bexy'),
+    id: 'titleTemplate',
+    name: 'titleTemplate',
+    value: settings.titleTemplate,
+}) }}
+
+{{ forms.textareaField({
+    label: 'Header text'|t('bexy'),
+    id: 'header',
+    name: 'header',
+    value: settings.header,
+    rows: 3,
+}) }}
+
+{{ forms.textareaField({
+    label: 'Footer text'|t('bexy'),
+    id: 'footer',
+    name: 'footer',
+    value: settings.footer,
+    rows: 3,
+}) }}
+
+{{ forms.lightswitchField({
+    label: 'Include the customer’s order note'|t('bexy'),
+    id: 'includeOrderNote',
+    name: 'includeOrderNote',
+    on: settings.includeOrderNote,
+}) }}
+
+{# ------------------------------------------------------------------ #}
+<hr>
+<h2>{{ 'bexio defaults'|t('bexy') }}</h2>
+
+{% if not connected %}
+    <div class="pane">
+        <p class="light">{{ 'Connect to bexio and these lists will fill in.'|t('bexy') }}</p>
+    </div>
+{% endif %}
+
+{{ forms.selectField({
+    label: 'bexio user'|t('bexy'),
+    instructions: 'bexio requires a user on every contact and document it files. Defaults to whoever authorised the connection.'|t('bexy'),
+    id: 'bexioUserId',
+    name: 'bexioUserId',
+    value: settings.bexioUserId,
+    options: userOptions,
+}) }}
+
+{{ forms.selectField({
+    label: 'Default revenue account'|t('bexy'),
+    instructions: 'Where a position is booked when its tax category has no account of its own.'|t('bexy'),
+    id: 'defaultAccountId',
+    name: 'defaultAccountId',
+    value: settings.defaultAccountId,
+    options: accountOptions,
+}) }}
+
+{{ forms.selectField({
+    label: 'Default sales tax'|t('bexy'),
+    instructions: 'Only active sales taxes appear here — bexio rejects any other kind on a document.'|t('bexy'),
+    id: 'defaultTaxId',
+    name: 'defaultTaxId',
+    value: settings.defaultTaxId,
+    options: taxOptions,
+}) }}
+
+{{ forms.selectField({
+    label: 'Unit'|t('bexy'),
+    id: 'defaultUnitId',
+    name: 'defaultUnitId',
+    value: settings.defaultUnitId,
+    options: meta.toOptions(meta.getUnits()),
+}) }}
+
+{{ forms.selectField({
+    label: 'Bank account'|t('bexy'),
+    id: 'bankAccountId',
+    name: 'bankAccountId',
+    value: settings.bankAccountId,
+    options: meta.toOptions(meta.getBankAccounts()),
+}) }}
+
+{{ forms.selectField({
+    label: 'Payment type'|t('bexy'),
+    id: 'paymentTypeId',
+    name: 'paymentTypeId',
+    value: settings.paymentTypeId,
+    options: meta.toOptions(meta.getPaymentTypes()),
+}) }}
+
+{{ forms.selectField({
+    label: 'Document language'|t('bexy'),
+    id: 'languageId',
+    name: 'languageId',
+    value: settings.languageId,
+    options: meta.toOptions(meta.getLanguages()),
+}) }}
+
+{{ forms.textField({
+    label: 'Letterhead ID'|t('bexy'),
+    instructions: 'bexio’s `logopaper_id`. Leave empty for the company default.'|t('bexy'),
+    id: 'logopaperId',
+    name: 'logopaperId',
+    value: settings.logopaperId,
+    type: 'number',
+    size: 6,
+}) }}
+
+{{ forms.textField({
+    label: 'Payment term'|t('bexy'),
+    instructions: 'Days until the invoice is due.'|t('bexy'),
+    id: 'paymentTermDays',
+    name: 'paymentTermDays',
+    value: settings.paymentTermDays,
+    type: 'number',
+    size: 5,
+}) }}
+
+{# ------------------------------------------------------------------ #}
+<hr>
+<h2>{{ 'Tax'|t('bexy') }}</h2>
+
+{{ forms.selectField({
+    label: 'How prices are sent'|t('bexy'),
+    instructions: 'bexio needs to know whether the prices carry tax already. “From Commerce” reads it off the order — a tax rate flagged “included in price” makes every price gross.'|t('bexy'),
+    id: 'mwstMode',
+    name: 'mwstMode',
+    value: settings.mwstMode,
+    options: [
+        { label: 'From Commerce'|t('bexy'), value: 'auto' },
+        { label: 'Prices include tax'|t('bexy'), value: 'included' },
+        { label: 'Tax added on top'|t('bexy'), value: 'excluded' },
+        { label: 'Exempt'|t('bexy'), value: 'exempt' },
+    ],
+}) }}
+
+{{ forms.editableTableField({
+    label: 'Tax and account mapping'|t('bexy'),
+    instructions: 'Each Commerce tax category, and the bexio tax and revenue account its line items are booked to. Anything left out falls back to the defaults above.'|t('bexy'),
+    id: 'taxMap',
+    name: 'taxMap',
+    cols: {
+        taxCategory: {
+            heading: 'Commerce tax category'|t('bexy'),
+            type: 'select',
+            options: taxCategoryOptions,
+        },
+        taxId: {
+            heading: 'bexio tax'|t('bexy'),
+            type: 'select',
+            options: taxOptions,
+        },
+        accountId: {
+            heading: 'bexio account'|t('bexy'),
+            type: 'select',
+            options: accountOptions,
+        },
+    },
+    rows: settings.taxMap,
+    addRowLabel: 'Add a mapping'|t('bexy'),
+    allowAdd: true,
+    allowDelete: true,
+    allowReorder: true,
+}) }}
+
+{{ forms.textField({
+    label: 'Shipping label'|t('bexy'),
+    id: 'shippingLabel',
+    name: 'shippingLabel',
+    value: settings.shippingLabel,
+}) }}
+
+{{ forms.selectField({
+    label: 'Shipping tax'|t('bexy'),
+    id: 'shippingTaxId',
+    name: 'shippingTaxId',
+    value: settings.shippingTaxId,
+    options: taxOptions,
+}) }}
+
+{{ forms.selectField({
+    label: 'Shipping account'|t('bexy'),
+    id: 'shippingAccountId',
+    name: 'shippingAccountId',
+    value: settings.shippingAccountId,
+    options: accountOptions,
+}) }}
+
+{{ forms.textField({
+    label: 'Discount label'|t('bexy'),
+    id: 'discountLabel',
+    name: 'discountLabel',
+    value: settings.discountLabel,
+}) }}
+
+{# ------------------------------------------------------------------ #}
+<hr>
+<h2>{{ 'Totals'|t('bexy') }}</h2>
+
+<div class="pane">
+    <p>{{ 'bexio works the document total out for itself. Bexy works out the same figure before sending and compares it to Commerce’s, so a mismatch is caught here rather than during a VAT return.'|t('bexy') }}</p>
+</div>
+
+{{ forms.lightswitchField({
+    label: 'Close a mismatch with a rounding position'|t('bexy'),
+    instructions: 'Adds an untaxed line for the difference, so the bexio total matches the order to the cent. Off, the difference is only reported.'|t('bexy'),
+    id: 'addRoundingPosition',
+    name: 'addRoundingPosition',
+    on: settings.addRoundingPosition,
+}) }}
+
+{{ forms.textField({
+    label: 'Tolerance'|t('bexy'),
+    instructions: 'How far the two totals may drift before Bexy does anything about it.'|t('bexy'),
+    id: 'roundingTolerance',
+    name: 'roundingTolerance',
+    value: settings.roundingTolerance,
+    size: 8,
+}) }}
+
+{{ forms.textField({
+    label: 'Largest difference to close'|t('bexy'),
+    instructions: 'Beyond this, Bexy refuses to adjust and reports the mismatch instead — a difference that size is a wrong tax mapping, not rounding, and closing it would hide the real problem. 0 removes the limit.'|t('bexy'),
+    id: 'roundingLimit',
+    name: 'roundingLimit',
+    value: settings.roundingLimit,
+    size: 8,
+}) }}
+
+{{ forms.textField({
+    label: 'Rounding label'|t('bexy'),
+    id: 'roundingLabel',
+    name: 'roundingLabel',
+    value: settings.roundingLabel,
+}) }}
+
+{# ------------------------------------------------------------------ #}
+<hr>
+<h2>{{ 'Contacts'|t('bexy') }}</h2>
+
+{{ forms.lightswitchField({
+    label: 'Create contacts'|t('bexy'),
+    instructions: 'Bexy matches on email first — its own map, then bexio’s contact list — and only creates when neither has one.'|t('bexy'),
+    id: 'createContacts',
+    name: 'createContacts',
+    on: settings.createContacts,
+}) }}
+
+{{ forms.lightswitchField({
+    label: 'Update existing contacts'|t('bexy'),
+    instructions: 'Pushes the order’s address onto the bexio contact. Off by default: the contact record belongs to the accountant, and a delivery address typed into the shop should not overwrite it.'|t('bexy'),
+    id: 'updateContacts',
+    name: 'updateContacts',
+    on: settings.updateContacts,
+}) }}
+
+{{ forms.textField({
+    label: 'Contact group IDs'|t('bexy'),
+    instructions: 'bexio contact group IDs for newly created contacts, comma separated.'|t('bexy'),
+    id: 'contactGroupIds',
+    name: 'contactGroupIds',
+    value: settings.contactGroupIds,
+    placeholder: '3,7',
+}) }}
+
+{# ------------------------------------------------------------------ #}
+<hr>
+<h2>{{ 'Items'|t('bexy') }}</h2>
+
+{{ forms.lightswitchField({
+    label: 'Match line items to bexio items by SKU'|t('bexy'),
+    instructions: 'Turns a line into a real bexio item position, which is what makes bexio’s own per-item reporting work. A SKU with no match falls back to a custom position.'|t('bexy'),
+    id: 'matchArticlesBySku',
+    name: 'matchArticlesBySku',
+    on: settings.matchArticlesBySku,
+}) }}
+
+{{ forms.lightswitchField({
+    label: 'Create items that don’t exist'|t('bexy'),
+    instructions: 'Adds the SKU to bexio’s item list the first time it is sold.'|t('bexy'),
+    id: 'createMissingArticles',
+    name: 'createMissingArticles',
+    on: settings.createMissingArticles,
+}) }}
+
+{# ------------------------------------------------------------------ #}
+<hr>
+<h2>{{ 'Payments'|t('bexy') }}</h2>
+
+{{ forms.lightswitchField({
+    label: 'Post payments to bexio'|t('bexy'),
+    instructions: 'Every successful Commerce charge becomes a payment against the invoice, so bexio does not leave paid orders sitting open. Applies to invoices only.'|t('bexy'),
+    id: 'pushPayments',
+    name: 'pushPayments',
+    on: settings.pushPayments,
+}) }}
+
+{{ forms.selectField({
+    label: 'Payments bank account'|t('bexy'),
+    instructions: 'Falls back to the bank account above.'|t('bexy'),
+    id: 'paymentBankAccountId',
+    name: 'paymentBankAccountId',
+    value: settings.paymentBankAccountId,
+    options: meta.toOptions(meta.getBankAccounts()),
+}) }}
+
+{{ forms.lightswitchField({
+    label: 'Cancel the invoice on a full refund'|t('bexy'),
+    instructions: 'Only when nothing has been paid against it in bexio — bexio will not cancel a settled invoice. Anything else is flagged for a credit voucher, because bexio’s API cannot raise one.'|t('bexy'),
+    id: 'cancelOnFullRefund',
+    name: 'cancelOnFullRefund',
+    on: settings.cancelOnFullRefund,
+}) }}
+
+{# ------------------------------------------------------------------ #}
+<hr>
+<h2>{{ 'Reconciliation'|t('bexy') }}</h2>
+
+{{ forms.lightswitchField({
+    label: 'Pull status back from bexio'|t('bexy'),
+    instructions: 'Run `craft bexy/reconcile/run` on a schedule. Without it, an invoice marked paid in bexio never reaches Commerce.'|t('bexy'),
+    id: 'reconcileEnabled',
+    name: 'reconcileEnabled',
+    on: settings.reconcileEnabled,
+}) }}
+
+{{ forms.editableTableField({
+    label: 'Status mapping'|t('bexy'),
+    instructions: 'When bexio reports one of these, move the Commerce order to the status beside it. Bexy changes the status only — it never fabricates a Commerce transaction to make an order look paid.'|t('bexy'),
+    id: 'statusMap',
+    name: 'statusMap',
+    cols: {
+        bexioStatus: {
+            heading: 'bexio status'|t('bexy'),
+            type: 'select',
+            options: plugin.reconcile.getBexioStatusOptions(settings.documentType),
+        },
+        orderStatus: {
+            heading: 'Commerce order status'|t('bexy'),
+            type: 'select',
+            options: orderStatusOptions,
+        },
+    },
+    rows: settings.statusMap,
+    addRowLabel: 'Add a mapping'|t('bexy'),
+    allowAdd: true,
+    allowDelete: true,
+    allowReorder: true,
+}) }}
+
+{{ forms.textField({
+    label: 'Only check documents from the last'|t('bexy'),
+    instructions: 'Days. Paid and cancelled documents drop out anyway — they cannot change again. 0 checks everything.'|t('bexy'),
+    id: 'reconcileWindowDays',
+    name: 'reconcileWindowDays',
+    value: settings.reconcileWindowDays,
+    type: 'number',
+    size: 5,
+}) }}
+
+{# ------------------------------------------------------------------ #}
+<hr>
+<h2>{{ 'Log'|t('bexy') }}</h2>
+
+{{ forms.lightswitchField({
+    label: 'Log requests'|t('bexy'),
+    id: 'loggingEnabled',
+    name: 'loggingEnabled',
+    on: settings.loggingEnabled,
+}) }}
+
+{{ forms.lightswitchField({
+    label: 'Keep request and response bodies'|t('bexy'),
+    instructions: 'Tokens and secrets are redacted either way.'|t('bexy'),
+    id: 'logPayloads',
+    name: 'logPayloads',
+    on: settings.logPayloads,
+}) }}
+
+{{ forms.textField({
+    label: 'Keep log entries for'|t('bexy'),
+    instructions: 'Days. 0 keeps everything. Pruned whenever a sync or reconcile command runs.'|t('bexy'),
+    id: 'logRetentionDays',
+    name: 'logRetentionDays',
+    value: settings.logRetentionDays,
+    type: 'number',
+    size: 5,
+}) }}
+
+{% js %}
+(function() {
+    var el = function(id) { return document.getElementById(id); };
+    var result = el('bexy-test-result');
+
+    // A secondary action on the settings screen cannot be its own <form> — Craft's settings form
+    // already wraps this markup, and a nested form posts nothing at all. So one is built and
+    // submitted from outside the DOM tree the settings form owns.
+    var submitTo = function(action) {
+        var form = document.createElement('form');
+        form.method = 'post';
+        form.action = '';
+
+        var add = function(name, value) {
+            var input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = name;
+            input.value = value;
+            form.appendChild(input);
+        };
+
+        add('action', action);
+        add(Craft.csrfTokenName, Craft.csrfTokenValue);
+
+        document.body.appendChild(form);
+        form.submit();
+    };
+
+    if (el('bexy-test')) {
+        el('bexy-test').addEventListener('click', function() {
+            result.textContent = Craft.t('bexy', 'Testing…');
+
+            Craft.sendActionRequest('POST', 'bexy/settings/test', {})
+                .then(function(response) {
+                    var data = response.data || {};
+
+                    if (data.ok) {
+                        result.innerHTML = '<span class="status green"></span> ' + Craft.escapeHtml(data.message)
+                            + (data.company ? ' — ' + Craft.escapeHtml(data.company) : '');
+                    } else {
+                        result.innerHTML = '<span class="status red"></span> ' + Craft.escapeHtml(data.message || '');
+                    }
+                })
+                .catch(function(error) {
+                    var data = (error && error.response && error.response.data) || {};
+                    result.innerHTML = '<span class="status red"></span> '
+                        + Craft.escapeHtml(data.message || Craft.t('bexy', 'Could not reach bexio.'));
+                });
+        });
+    }
+
+    if (el('bexy-connect')) {
+        el('bexy-connect').addEventListener('click', function() { submitTo('bexy/settings/connect'); });
+    }
+
+    if (el('bexy-disconnect')) {
+        el('bexy-disconnect').addEventListener('click', function() {
+            if (confirm(Craft.t('bexy', 'Forget this bexio connection?'))) {
+                submitTo('bexy/settings/disconnect');
+            }
+        });
+    }
+
+    if (el('bexy-refresh-meta')) {
+        el('bexy-refresh-meta').addEventListener('click', function() { submitTo('bexy/settings/refresh-meta'); });
+    }
+})();
+{% endjs %}

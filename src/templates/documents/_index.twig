@@ -1,0 +1,120 @@
+{% extends '_layouts/cp' %}
+{% import '_includes/forms' as forms %}
+
+{% set title = 'Documents'|t('bexy') %}
+{% set selectedSubnavItem = 'documents' %}
+
+{% set crumbs = [
+    { label: 'Bexy'|t('bexy'), url: url('bexy') },
+] %}
+
+{% block content %}
+    {% if not connected %}
+        <div class="pane">
+            <p class="warning">
+                {{ 'Bexy is not connected to bexio.'|t('bexy') }}
+                <a href="{{ url('settings/plugins/bexy') }}">{{ 'Open settings'|t('bexy') }}</a>
+            </p>
+        </div>
+    {% endif %}
+
+    <div class="pane" style="display: flex; gap: 24px; flex-wrap: wrap;">
+        {% for key, label in {
+            total: 'Total'|t('bexy'),
+            pending: 'Pending'|t('bexy'),
+            synced: 'Synced'|t('bexy'),
+            failed: 'Failed'|t('bexy'),
+            attention: 'Need attention'|t('bexy')
+        } %}
+            <div>
+                <div class="light smalltext">{{ label }}</div>
+                <div style="font-size: 22px; font-weight: 600;">{{ counts[key] }}</div>
+            </div>
+        {% endfor %}
+    </div>
+
+    <form method="get" class="pane" style="display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap;">
+        {{ forms.select({
+            name: 'status',
+            value: criteria.status,
+            options: [
+                { label: 'Any status'|t('bexy'), value: '' },
+                { label: 'Pending'|t('bexy'), value: 'pending' },
+                { label: 'Synced'|t('bexy'), value: 'synced' },
+                { label: 'Failed'|t('bexy'), value: 'failed' },
+                { label: 'Cancelled'|t('bexy'), value: 'cancelled' },
+            ]
+        }) }}
+        {{ forms.text({ name: 'search', value: criteria.search, placeholder: 'Order or bexio number'|t('bexy') }) }}
+        {{ forms.checkbox({ name: 'attention', label: 'Needs attention'|t('bexy'), checked: criteria.needsAttention }) }}
+        <button type="submit" class="btn submit">{{ 'Filter'|t('bexy') }}</button>
+    </form>
+
+    {% if documents|length %}
+        <table class="data fullwidth">
+            <thead>
+                <tr>
+                    <th>{{ 'Order'|t('bexy') }}</th>
+                    <th>{{ 'bexio'|t('bexy') }}</th>
+                    <th>{{ 'Status'|t('bexy') }}</th>
+                    <th>{{ 'bexio status'|t('bexy') }}</th>
+                    <th class="rightalign">{{ 'Total'|t('bexy') }}</th>
+                    <th class="rightalign">{{ 'Paid'|t('bexy') }}</th>
+                    <th>{{ 'Synced'|t('bexy') }}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for document in documents %}
+                    <tr>
+                        <td>
+                            <a href="{{ document.getCpEditUrl() }}">{{ document.orderNumber ?: document.orderId }}</a>
+                            {% if document.needsAttention %}
+                                <span class="status orange" title="{{ document.needsAttention }}"></span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if document.bexioId %}
+                                <a href="{{ document.getBexioUrl() }}" rel="noopener" target="_blank">
+                                    {{ document.bexioNumber ?: document.bexioId }}
+                                </a>
+                            {% else %}
+                                <span class="light">—</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span class="status {{ document.getStatusColor() }}"></span>
+                            {{ document.getStatusLabel() }}
+                        </td>
+                        <td>{{ document.getBexioStatusLabel() ?: '—' }}</td>
+                        <td class="rightalign">
+                            {{ document.documentTotal ? document.documentTotal|number_format(2) : '—' }}
+                            {{ document.currency }}
+                            {% if document.getHasRoundingDelta() %}
+                                <span class="status orange" title="{{ 'Differs from the order total by {delta}'|t('bexy', { delta: document.roundingDelta|number_format(2) }) }}"></span>
+                            {% endif %}
+                        </td>
+                        <td class="rightalign">{{ document.amountPaid|number_format(2) }}</td>
+                        <td>{{ document.dateSynced ? document.dateSynced|datetime('short') : '—' }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        {% set pages = (total / perPage)|round(0, 'ceil') %}
+        {% if pages > 1 %}
+            <div class="pane" style="display: flex; gap: 8px; align-items: center;">
+                {% if page > 1 %}
+                    <a class="btn" href="{{ url('bexy/documents', craft.app.request.queryParams|merge({ page: page - 1 })) }}">{{ '← Previous'|t('bexy') }}</a>
+                {% endif %}
+                <span class="light">{{ 'Page {page} of {pages}'|t('bexy', { page: page, pages: pages }) }}</span>
+                {% if page < pages %}
+                    <a class="btn" href="{{ url('bexy/documents', craft.app.request.queryParams|merge({ page: page + 1 })) }}">{{ 'Next →'|t('bexy') }}</a>
+                {% endif %}
+            </div>
+        {% endif %}
+    {% else %}
+        <div class="pane">
+            <p class="light">{{ 'No documents yet. Complete an order, or push one from its edit screen.'|t('bexy') }}</p>
+        </div>
+    {% endif %}
+{% endblock %}

@@ -1,0 +1,92 @@
+{# Bexy's panel on Commerce's own order edit screen. #}
+<div class="order-details-block" id="bexy-order-panel">
+    <h3 class="order-details-title">{{ 'bexio'|t('bexy') }}</h3>
+
+    {% if not connected %}
+        <p class="light">
+            {{ 'Not connected to bexio.'|t('bexy') }}
+            <a href="{{ url('settings/plugins/bexy') }}">{{ 'Settings'|t('bexy') }}</a>
+        </p>
+    {% elseif document and document.bexioId %}
+        <p>
+            <span class="status {{ document.getStatusColor() }}"></span>
+            <a href="{{ document.getBexioUrl() }}" rel="noopener" target="_blank">
+                {{ document.bexioNumber ?: document.bexioId }}
+            </a>
+            {% if document.getBexioStatusLabel() %}
+                <span class="light">· {{ document.getBexioStatusLabel() }}</span>
+            {% endif %}
+        </p>
+
+        {% if document.getHasRoundingDelta() %}
+            <p class="light smalltext">
+                {{ 'Totals differed by {delta} and were closed with a rounding position.'|t('bexy', {
+                    delta: document.roundingDelta|number_format(2)
+                }) }}
+            </p>
+        {% endif %}
+
+        {% if document.needsAttention %}
+            <p class="warning smalltext">{{ document.needsAttention }}</p>
+        {% endif %}
+
+        <p>
+            <a class="btn small" href="{{ document.getCpEditUrl() }}">{{ 'Details'|t('bexy') }}</a>
+            <a class="btn small" href="{{ actionUrl('bexy/documents/pdf', { documentId: document.id }) }}" target="_blank" rel="noopener">{{ 'PDF'|t('bexy') }}</a>
+        </p>
+    {% else %}
+        <p class="light">
+            {% if document and document.status == 'failed' %}
+                <span class="status red"></span> {{ 'The last push failed.'|t('bexy') }}
+            {% elseif document %}
+                <span class="status yellow"></span> {{ 'Waiting to be sent.'|t('bexy') }}
+            {% else %}
+                {{ 'Not sent to bexio.'|t('bexy') }}
+            {% endif %}
+        </p>
+
+        {% if document and document.lastError %}
+            <p class="smalltext" style="white-space: pre-wrap;">{{ document.lastError }}</p>
+        {% endif %}
+
+        {% if canPush and order.isCompleted %}
+            <p>
+                <button type="button" class="btn small submit" id="bexy-push-now">{{ 'Send to bexio'|t('bexy') }}</button>
+                <span id="bexy-push-result" class="light smalltext"></span>
+            </p>
+
+            {% js %}
+            (function() {
+                var button = document.getElementById('bexy-push-now');
+                var result = document.getElementById('bexy-push-result');
+
+                if (!button) { return; }
+
+                button.addEventListener('click', function() {
+                    button.setAttribute('disabled', 'disabled');
+                    result.textContent = Craft.t('bexy', 'Sending…');
+
+                    Craft.sendActionRequest('POST', 'bexy/documents/push', {
+                        data: { orderId: {{ order.id }} }
+                    })
+                        .then(function(response) {
+                            var data = response.data || {};
+                            result.textContent = data.message || '';
+
+                            if (data.success) {
+                                window.location.reload();
+                            } else {
+                                button.removeAttribute('disabled');
+                            }
+                        })
+                        .catch(function(error) {
+                            var data = (error && error.response && error.response.data) || {};
+                            result.textContent = data.message || Craft.t('bexy', 'Could not reach bexio.');
+                            button.removeAttribute('disabled');
+                        });
+                });
+            })();
+            {% endjs %}
+        {% endif %}
+    {% endif %}
+</div>

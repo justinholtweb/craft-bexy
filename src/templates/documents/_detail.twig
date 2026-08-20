@@ -1,0 +1,209 @@
+{% extends '_layouts/cp' %}
+
+{% set title = document.orderNumber ?: 'Document'|t('bexy') %}
+{% set selectedSubnavItem = 'documents' %}
+
+{% set crumbs = [
+    { label: 'Bexy'|t('bexy'), url: url('bexy') },
+    { label: 'Documents'|t('bexy'), url: url('bexy/documents') },
+] %}
+
+{% block content %}
+    {% if document.needsAttention %}
+        <div class="pane" style="border-left: 3px solid #f5a623;">
+            <p><strong>{{ 'Needs attention'|t('bexy') }}</strong></p>
+            <p>{{ document.needsAttention }}</p>
+        </div>
+    {% endif %}
+
+    {% if document.lastError %}
+        <div class="pane" style="border-left: 3px solid #cf1124;">
+            <p><strong>{{ 'Last message from bexio'|t('bexy') }}</strong></p>
+            <p style="white-space: pre-wrap;">{{ document.lastError }}</p>
+        </div>
+    {% endif %}
+
+    <div class="pane">
+        <table class="data fullwidth">
+            <tbody>
+                <tr>
+                    <th style="width: 220px;">{{ 'Commerce order'|t('bexy') }}</th>
+                    <td>
+                        {% if order %}
+                            <a href="{{ order.getCpEditUrl() }}">{{ order.reference ?: order.number }}</a>
+                        {% else %}
+                            <span class="light">{{ 'Deleted'|t('bexy') }}</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                <tr>
+                    <th>{{ 'bexio document'|t('bexy') }}</th>
+                    <td>
+                        {% if document.bexioId %}
+                            <a href="{{ document.getBexioUrl() }}" rel="noopener" target="_blank">
+                                {{ document.bexioNumber ?: document.bexioId }}
+                            </a>
+                            <span class="light">({{ document.documentType }})</span>
+                        {% else %}
+                            <span class="light">{{ 'Not created yet'|t('bexy') }}</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                <tr>
+                    <th>{{ 'Status'|t('bexy') }}</th>
+                    <td>
+                        <span class="status {{ document.getStatusColor() }}"></span>
+                        {{ document.getStatusLabel() }}
+                        {% if document.getBexioStatusLabel() %}
+                            <span class="light">· {{ 'bexio says {status}'|t('bexy', { status: document.getBexioStatusLabel() }) }}</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                <tr>
+                    <th>{{ 'Issued / sent'|t('bexy') }}</th>
+                    <td>
+                        {{ document.isIssued ? 'Issued'|t('bexy') : 'Draft'|t('bexy') }}
+                        · {{ document.isSent ? 'Emailed by bexio'|t('bexy') : 'Not emailed'|t('bexy') }}
+                    </td>
+                </tr>
+                <tr>
+                    <th>{{ 'Order total'|t('bexy') }}</th>
+                    <td>{{ document.orderTotal|number_format(2) }} {{ document.currency }}</td>
+                </tr>
+                <tr>
+                    <th>{{ 'Document total'|t('bexy') }}</th>
+                    <td>
+                        {{ document.documentTotal|number_format(2) }} {{ document.currency }}
+                        {% if document.getHasRoundingDelta() %}
+                            <span class="status orange"></span>
+                            <span class="light">
+                                {{ 'differed by {delta} before rounding'|t('bexy', { delta: document.roundingDelta|number_format(4) }) }}
+                            </span>
+                        {% endif %}
+                    </td>
+                </tr>
+                <tr>
+                    <th>{{ 'Paid in bexio'|t('bexy') }}</th>
+                    <td>
+                        {{ document.amountPaid|number_format(2) }} {{ document.currency }}
+                        {% if document.amountRemaining is not null %}
+                            <span class="light">· {{ 'outstanding {amount}'|t('bexy', { amount: document.amountRemaining|number_format(2) }) }}</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                <tr>
+                    <th>{{ 'api_reference'|t('bexy') }}</th>
+                    <td><code>{{ document.apiReference }}</code></td>
+                </tr>
+                <tr>
+                    <th>{{ 'Attempts'|t('bexy') }}</th>
+                    <td>{{ document.attempts }}</td>
+                </tr>
+                <tr>
+                    <th>{{ 'Last synced'|t('bexy') }}</th>
+                    <td>{{ document.dateSynced ? document.dateSynced|datetime('short') : '—' }}</td>
+                </tr>
+                <tr>
+                    <th>{{ 'Last reconciled'|t('bexy') }}</th>
+                    <td>{{ document.dateReconciled ? document.dateReconciled|datetime('short') : '—' }}</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="pane">
+        <div class="buttons">
+            {% if canPush and order %}
+                <button type="button" class="btn submit" data-bexy-action="bexy/documents/push" data-bexy-order="{{ order.id }}">
+                    {{ document.bexioId ? 'Push again'|t('bexy') : 'Push to bexio'|t('bexy') }}
+                </button>
+            {% endif %}
+            {% if document.bexioId %}
+                <button type="button" class="btn" data-bexy-action="bexy/documents/reconcile" data-bexy-document="{{ document.id }}">
+                    {{ 'Refresh from bexio'|t('bexy') }}
+                </button>
+                <a class="btn" href="{{ actionUrl('bexy/documents/pdf', { documentId: document.id }) }}" target="_blank" rel="noopener">
+                    {{ 'View PDF'|t('bexy') }}
+                </a>
+            {% endif %}
+            {% if canCancel and document.bexioId and document.documentType == 'invoice' and document.status != 'cancelled' %}
+                <button type="button" class="btn" data-bexy-action="bexy/documents/cancel" data-bexy-document="{{ document.id }}" data-bexy-confirm="{{ 'Cancel this invoice in bexio?'|t('bexy') }}">
+                    {{ 'Cancel in bexio'|t('bexy') }}
+                </button>
+            {% endif %}
+            {% if canCancel %}
+                <button type="button" class="btn" data-bexy-action="bexy/documents/forget" data-bexy-document="{{ document.id }}" data-bexy-confirm="{{ 'Forget Bexy’s record of this order? The bexio document is left alone.'|t('bexy') }}">
+                    {{ 'Forget'|t('bexy') }}
+                </button>
+            {% endif %}
+        </div>
+    </div>
+
+    {% set payments = payments ?? [] %}
+    {% if payments|length %}
+        <h2>{{ 'Payments posted'|t('bexy') }}</h2>
+        <table class="data fullwidth">
+            <thead>
+                <tr>
+                    <th>{{ 'Commerce transaction'|t('bexy') }}</th>
+                    <th>{{ 'bexio payment'|t('bexy') }}</th>
+                    <th class="rightalign">{{ 'Amount'|t('bexy') }}</th>
+                    <th>{{ 'Paid on'|t('bexy') }}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for payment in payments %}
+                    <tr>
+                        <td>#{{ payment.transactionId }}</td>
+                        <td>{{ payment.bexioPaymentId ?: '—' }}</td>
+                        <td class="rightalign">{{ payment.amount|number_format(2) }} {{ payment.currency }}</td>
+                        <td>{{ payment.paidOn ? payment.paidOn|datetime('short') : '—' }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
+
+    {% if document.payload %}
+        <h2>{{ 'What was sent'|t('bexy') }}</h2>
+        <div class="pane">
+            <pre style="max-height: 480px; overflow: auto;"><code>{{ document.payload }}</code></pre>
+        </div>
+    {% endif %}
+
+    {% js %}
+    // These are secondary actions on a page Craft already wraps in a form, so each one builds and
+    // submits its own form rather than nesting one, which posts nothing at all.
+    document.querySelectorAll('[data-bexy-action]').forEach(function(button) {
+        button.addEventListener('click', function() {
+            var confirmText = button.getAttribute('data-bexy-confirm');
+
+            if (confirmText && !confirm(confirmText)) {
+                return;
+            }
+
+            var form = document.createElement('form');
+            form.method = 'post';
+            form.action = '';
+
+            var add = function(name, value) {
+                if (value === null) { return; }
+                var input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = name;
+                input.value = value;
+                form.appendChild(input);
+            };
+
+            add('action', button.getAttribute('data-bexy-action'));
+            add(Craft.csrfTokenName, Craft.csrfTokenValue);
+            add('orderId', button.getAttribute('data-bexy-order'));
+            add('documentId', button.getAttribute('data-bexy-document'));
+            add('force', '1');
+
+            document.body.appendChild(form);
+            form.submit();
+        });
+    });
+    {% endjs %}
+{% endblock %}
