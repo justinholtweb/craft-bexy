@@ -379,6 +379,20 @@
   .term .warn { color: var(--lime); }
   .term .blank { display: block; height: 20px; }
 
+  /* ---- trademark fine print --------------------------------------------- */
+  /* The cover leads with bexio's own mark, which is exactly the image that would
+     read as an official integration if nothing said otherwise. */
+  .disclaimer {
+    position: absolute;
+    left: 130px;
+    right: 130px;
+    bottom: 56px;
+    z-index: 3;
+    font-size: 19px;
+    line-height: 1.45;
+    color: rgba(240, 240, 245, 0.32);
+  }
+
   /* ---- footer lockup --------------------------------------------------- */
   .footer {
     position: absolute;
@@ -465,6 +479,8 @@
     </div>
     <div class="mark"><img src="assets/icon.svg" alt=""></div>
   </div>
+  <p class="disclaimer">Bexy is an independent plugin and is not affiliated with, endorsed by, or
+    sponsored by bexio AG. &ldquo;bexio&rdquo; and the bexio logo are trademarks of bexio AG.</p>
 </section>
 
 <!-- 2 · The whole idea =================================================== -->

@@ -5,6 +5,15 @@ order: 50
 summary: Preis, Umfang und die Fragen, die vor dem Kauf aufkommen.
 ---
 
+## Wird Bexy von bexio hergestellt?
+
+Nein. Bexy ist ein unabhängiges Plugin von Justin Holt. Es steht **in keiner Verbindung zur bexio
+AG und wird von ihr weder unterstützt noch gesponsert**. Es spricht mit der öffentlichen API von
+bexio wie jede andere Integration von Dritten.
+
+«bexio» und das bexio-Logo sind Marken der bexio AG und werden hier nur verwendet, um den Dienst zu
+bezeichnen, mit dem Bexy sich verbindet.
+
 ## Was kostet es?
 
 99 $, einmalig. Eine Edition, keine Verlängerung, keine gesperrten Funktionen. Updates für Craft 5

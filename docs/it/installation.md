@@ -104,3 +104,8 @@ Poi mappate le categorie IVA di Commerce in **Mappatura IVA e conti**. Vedi
 
 `sync/preview` costruisce il corpo del documento attraverso lo stesso percorso di codice
 dell’invio reale, quindi ciò che stampa è byte per byte quello che riceverebbe bexio.
+
+---
+
+*Bexy è un plugin indipendente. Non è affiliato a bexio AG, né approvato o sponsorizzato da essa.
+«bexio» e il logo bexio sono marchi di bexio AG.*

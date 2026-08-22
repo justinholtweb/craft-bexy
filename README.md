@@ -5,6 +5,9 @@ payments that settle them, and pull bexio's verdict back into Commerce.
 
 Craft CMS 5.3+ · Craft Commerce 5.0+ · PHP 8.2+ · **$99**, one perpetual licence per site.
 
+> **Not a bexio product.** Bexy is an independent plugin built by Justin Holt. It is not affiliated
+> with, endorsed by, or sponsored by bexio AG.
+
 ---
 
 ## What it does
@@ -141,4 +144,13 @@ one.
 
 ## Licence
 
-Proprietary. One Craft installation per licence — see `LICENSE.md`.
+The Craft License. One Craft installation per licence — see `LICENSE.md`.
+
+## Trademarks
+
+Bexy is an independent plugin and is **not affiliated with, endorsed by, or sponsored by bexio
+AG**. It uses bexio's public API in the way any third-party integration does.
+
+“bexio”, the bexio logo and the `bx` mark are trademarks of bexio AG. They appear in this plugin's
+icon and marketing material only to identify the service Bexy connects to, which is nominative use
+and not a claim of endorsement.

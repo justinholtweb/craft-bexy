@@ -102,3 +102,8 @@ Then map your Commerce tax categories in **Tax and account mapping**. See
 
 `sync/preview` builds the document body through the same code path as the real push, so what it
 prints is byte-for-byte what bexio would receive.
+
+---
+
+*Bexy is an independent plugin and is not affiliated with, endorsed by, or sponsored by bexio AG.
+“bexio” and the bexio logo are trademarks of bexio AG.*

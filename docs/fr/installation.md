@@ -106,3 +106,8 @@ Associez ensuite vos catégories de TVA Commerce dans **Correspondance TVA et co
 
 `sync/preview` construit le corps du document par le même chemin de code que l’envoi réel : ce
 qu’il affiche est, octet pour octet, ce que bexio recevrait.
+
+---
+
+*Bexy est un plugin indépendant. Il n’est ni affilié à bexio AG, ni approuvé ni sponsorisé par
+elle. « bexio » et le logo bexio sont des marques de bexio AG.*

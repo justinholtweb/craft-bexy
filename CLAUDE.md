@@ -150,6 +150,11 @@ whose conventions this follows.
   without front matter is skipped, which is how `docs/plan.md` stays off the site.
 - **`promos/` renders the seven Plugin Store images**, `./build.sh`. Export-ignored, like `docs`
   and `tests`.
+- **The non-affiliation notice is not optional.** The plugin is named after, and carries the logo
+  of, somebody else's product. It appears in the README header and Trademarks section, at the foot
+  of `installation.md` and as the first FAQ entry — **in all four languages** — on the promo cover,
+  and in the marketing site footer on every page via the `pluginDisclaimer` field. Adding a
+  language means adding it there too.
 
 ## Translations
 

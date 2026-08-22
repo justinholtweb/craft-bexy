@@ -5,6 +5,15 @@ order: 50
 summary: Pricing, scope, and the questions that come up before buying.
 ---
 
+## Is Bexy made by bexio?
+
+No. Bexy is an independent plugin built by Justin Holt. It is **not affiliated with, endorsed by,
+or sponsored by bexio AG**. It talks to bexio's public API the same way any third-party integration
+does.
+
+“bexio” and the bexio logo are trademarks of bexio AG, used here only to identify the service Bexy
+connects to.
+
 ## What does it cost?
 
 $99, once. One edition, no renewal, no feature gates. Updates for Craft 5 are included.

@@ -5,6 +5,15 @@ order: 50
 summary: Prezzo, ambito e le domande che emergono prima dell’acquisto.
 ---
 
+## Bexy è realizzato da bexio?
+
+No. Bexy è un plugin indipendente realizzato da Justin Holt. **Non è affiliato a bexio AG, né
+approvato o sponsorizzato da essa.** Dialoga con l’API pubblica di bexio come qualsiasi altra
+integrazione di terze parti.
+
+«bexio» e il logo bexio sono marchi di bexio AG, usati qui solo per identificare il servizio a cui
+Bexy si collega.
+
 ## Quanto costa?
 
 99 $, una volta sola. Un’unica edizione, nessun rinnovo, nessuna funzione bloccata. Gli

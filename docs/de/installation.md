@@ -105,3 +105,8 @@ Danach die Commerce-Steuerkategorien unter **Steuer- und Kontozuordnung** zuordn
 
 `sync/preview` baut den Belegkörper über denselben Codepfad wie die echte Übermittlung — was es
 ausgibt, ist Byte für Byte das, was bexio bekäme.
+
+---
+
+*Bexy ist ein unabhängiges Plugin. Es steht in keiner Verbindung zur bexio AG und wird von ihr
+weder unterstützt noch gesponsert. «bexio» und das bexio-Logo sind Marken der bexio AG.*
