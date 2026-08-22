@@ -192,6 +192,10 @@
     line-height: 1;
     letter-spacing: 0.01em;
   }
+  /* This deck's after-state is a phrase rather than a single token, so it needs
+     to be told not to wrap — and sized to fit 1660px of usable width. */
+  .statement .after { font-size: 108px; white-space: nowrap; }
+  .statement .lede { margin-top: 52px; }
   .statement .lede { margin-top: 40px; max-width: 34ch; font-size: 32px; }
 
   /* ---- feature slides -------------------------------------------------- */
