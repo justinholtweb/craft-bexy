@@ -1,6 +1,6 @@
 {
     "name": "justinholtweb/craft-bexy",
-    "description": "bexio integration for Craft Commerce — turn completed orders into bexio invoices or orders, push the payments that settle them, and pull bexio's verdict back into Commerce.",
+    "description": "bexio integration for Craft Commerce \u2014 turn completed orders into bexio invoices or orders, push the payments that settle them, and pull bexio's verdict back into Commerce.",
     "version": "5.0.0",
     "type": "craft-plugin",
     "keywords": [
@@ -49,7 +49,7 @@
         "handle": "bexy",
         "developer": "Justin Holt",
         "developerUrl": "https://justinholt.com",
-        "documentationUrl": "https://github.com/justinholtweb/craft-bexy/blob/main/README.md",
+        "documentationUrl": "https://justinholt.com/plugins/craft-bexy/docs",
         "changelogUrl": "https://raw.githubusercontent.com/justinholtweb/craft-bexy/main/CHANGELOG.md",
         "class": "justinholtweb\\bexy\\Plugin"
     }

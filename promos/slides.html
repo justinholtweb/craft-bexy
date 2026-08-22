@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<!-- handmade: hand-tuned deck -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Bexy — Plugin Store promos</title>
+<link rel="stylesheet" href="fonts.css">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --charcoal: #0f0f1a;
+    --charcoal-light: #1a1a2e;
+    --charcoal-lighter: #252540;
+    --accent: #3B82D6;
+    --accent-light: #6BA6E8;
+    --lime: #81DD01;
+    --off-white: #f0f0f5;
+  }
+
+  html { background: #000; }
+
+  body {
+    font-family: 'Inter', -apple-system, sans-serif;
+    color: var(--off-white);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ---- slide shell ---------------------------------------------------- */
+  .slide {
+    position: relative;
+    width: 1920px;
+    height: 1080px;
+    overflow: hidden;
+    background:
+      radial-gradient(ellipse at 85% 15%, rgba(59, 130, 214, 0.22) 0%, transparent 40%),
+      radial-gradient(ellipse at 65% 5%,  rgba(107, 166, 232, 0.14) 0%, transparent 35%),
+      radial-gradient(ellipse at 15% 85%, rgba(129, 221, 1, 0.07) 0%, transparent 40%),
+      radial-gradient(ellipse at 35% 95%, rgba(59, 130, 214, 0.09) 0%, transparent 35%),
+      linear-gradient(135deg, #0f0f1a 0%, #101827 30%, #101d33 60%, #0f0f1a 100%);
+  }
+
+  /* Oversized watermark, echoing the app icon */
+  .slide::after {
+    content: '';
+    position: absolute;
+    top: -18%;
+    left: -12%;
+    width: 1180px;
+    height: 1180px;
+    background: url('assets/watermark.svg') no-repeat center / contain;
+    opacity: 0.05;
+    pointer-events: none;
+  }
+
+  /* Hairline along the top edge */
+  .slide::before {
+    content: '';
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 6px;
+    background: linear-gradient(90deg, var(--accent), var(--accent-light), var(--lime), var(--accent));
+    z-index: 5;
+  }
+
+  .inner {
+    position: relative;
+    z-index: 2;
+    height: 100%;
+    padding: 118px 130px;
+    display: flex;
+    align-items: center;
+  }
+
+  /* ---- type ------------------------------------------------------------ */
+  .eyebrow {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    font-size: 20px;
+    font-weight: 500;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: rgba(240, 240, 245, 0.62);
+    margin-bottom: 34px;
+  }
+  .eyebrow .rule {
+    width: 58px;
+    height: 3px;
+    border-radius: 2px;
+    background: var(--accent-light);
+  }
+
+  h1, h2 {
+    font-family: 'Jersey 20', sans-serif;
+    font-weight: 400;
+    line-height: 0.9;
+    letter-spacing: 0.005em;
+  }
+
+  .gradient-text {
+    background: linear-gradient(100deg, #3B82D6 0%, #6BA6E8 38%, #81DD01 68%, #3B82D6 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .lede {
+    font-size: 34px;
+    line-height: 1.5;
+    color: rgba(240, 240, 245, 0.72);
+  }
+
+  .mono {
+    font-family: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+  }
+
+  /* ---- cover slide ----------------------------------------------------- */
+  .cover .inner { gap: 90px; }
+  .cover .copy { flex: 1 1 auto; }
+  .cover h1 { font-size: 200px; margin-bottom: 26px; }
+  .cover .tagline {
+    font-family: 'Jersey 20', sans-serif;
+    font-size: 60px;
+    line-height: 1.02;
+    color: var(--off-white);
+    margin-bottom: 40px;
+    max-width: 15ch;
+  }
+  .cover .lede { max-width: 27ch; font-size: 30px; }
+
+  .cover .mark {
+    flex: 0 0 auto;
+    width: 460px;
+    height: 460px;
+    filter: drop-shadow(14px 14px 0 rgba(0, 0, 0, 0.35));
+  }
+  .cover .mark img { width: 100%; height: 100%; display: block; }
+
+  .badges { display: flex; gap: 16px; margin-top: 52px; }
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 26px;
+    font-size: 22px;
+    font-weight: 500;
+    color: rgba(240, 240, 245, 0.85);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 999px;
+  }
+  .badge .dot {
+    width: 10px; height: 10px; border-radius: 50%;
+    background: var(--accent-light);
+  }
+
+  /* ---- the before/after statement -------------------------------------- */
+  .statement .inner { flex-direction: column; justify-content: center; align-items: center; text-align: center; }
+  .statement .eyebrow { justify-content: center; }
+  .swap { display: flex; flex-direction: column; align-items: center; gap: 22px; margin-top: 8px; }
+  .swap .caption {
+    font-size: 26px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: rgba(240, 240, 245, 0.42);
+  }
+  .swap .before {
+    font-size: 92px;
+    color: rgba(240, 240, 245, 0.34);
+    letter-spacing: 0.02em;
+  }
+  .swap .arrow {
+    width: 4px;
+    height: 62px;
+    border-radius: 2px;
+    background: linear-gradient(180deg, rgba(63,176,139,0.15), var(--accent-light));
+    position: relative;
+  }
+  .swap .arrow::after {
+    content: '';
+    position: absolute;
+    left: 50%; bottom: -4px;
+    width: 18px; height: 18px;
+    transform: translateX(-50%) rotate(45deg);
+    border-right: 4px solid var(--accent-light);
+    border-bottom: 4px solid var(--accent-light);
+    border-radius: 2px;
+  }
+  .swap .after {
+    font-size: 150px;
+    line-height: 1;
+    letter-spacing: 0.01em;
+  }
+  .statement .lede { margin-top: 40px; max-width: 34ch; font-size: 32px; }
+
+  /* ---- feature slides -------------------------------------------------- */
+  .feature .inner { align-items: center; }
+  .feature .copy { width: 780px; flex: 0 0 780px; }
+  .feature h2 { font-size: 108px; margin-bottom: 30px; }
+  .feature .lede { max-width: 21ch; }
+
+  .points {
+    list-style: none;
+    margin-top: 44px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+  .points li {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    font-size: 25px;
+    line-height: 1.4;
+    color: rgba(240, 240, 245, 0.6);
+  }
+  .points li .tick {
+    flex: 0 0 auto;
+    margin-top: 9px;
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: var(--accent-light);
+  }
+
+  /* Right-hand panel shared by the token, bucket, flow and table slides */
+  .panel {
+    position: absolute;
+    top: 50%;
+    left: 900px;
+    right: 130px;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+  }
+
+  /* ---- format tokens --------------------------------------------------- */
+  .token-row {
+    display: flex;
+    align-items: center;
+    gap: 30px;
+    padding: 34px 38px;
+    border-radius: 16px;
+    background: rgba(37, 37, 64, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+  .token-row .fmt { font-size: 32px; color: rgba(240, 240, 245, 0.55); flex: 1 1 auto; }
+  .token-row .to { color: var(--accent-light); font-size: 30px; flex: 0 0 auto; }
+  .token-row .val { font-size: 34px; color: var(--off-white); flex: 0 0 auto; }
+
+  /* ---- reset buckets --------------------------------------------------- */
+  .buckets { display: flex; gap: 22px; }
+  .bucket {
+    flex: 1 1 0;
+    padding: 38px 30px;
+    border-radius: 18px;
+    background: rgba(37, 37, 64, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    text-align: center;
+  }
+  .bucket .period {
+    font-size: 26px;
+    letter-spacing: 0.1em;
+    color: rgba(240, 240, 245, 0.5);
+    margin-bottom: 20px;
+  }
+  .bucket .count {
+    font-family: 'Jersey 20', sans-serif;
+    font-size: 92px;
+    line-height: 1;
+    color: var(--accent-light);
+  }
+  .bucket .label { font-size: 21px; color: rgba(240, 240, 245, 0.4); margin-top: 16px; }
+  .bucket.match .count { color: var(--lime); }
+  .bucket.gap .count { color: #ff8f6b; }
+
+  .note {
+    font-size: 24px;
+    line-height: 1.5;
+    color: rgba(240, 240, 245, 0.45);
+    text-align: center;
+    margin-top: 8px;
+  }
+
+  /* ---- allocation flow -------------------------------------------------- */
+  .step {
+    display: flex;
+    align-items: center;
+    gap: 26px;
+    padding: 28px 34px;
+    border-radius: 16px;
+    background: rgba(37, 37, 64, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+  .step .num {
+    flex: 0 0 auto;
+    width: 58px; height: 58px;
+    display: grid; place-items: center;
+    border-radius: 12px;
+    background: var(--accent);
+    font-family: 'Jersey 20', sans-serif;
+    font-size: 38px;
+    color: #fff;
+  }
+  .step .label { display: block; font-size: 29px; font-weight: 600; color: var(--off-white); }
+  .step .sub { display: block; font-size: 21px; color: rgba(240, 240, 245, 0.55); margin-top: 6px; }
+
+  .lock {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    font-size: 23px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgba(240, 240, 245, 0.42);
+  }
+  .lock .bar { flex: 1 1 auto; height: 1px; background: rgba(255,255,255,0.1); }
+
+  /* ---- backfill table --------------------------------------------------- */
+  .sheet {
+    border-radius: 18px;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 30px 90px rgba(0, 0, 0, 0.5);
+  }
+  .sheet .head {
+    display: flex;
+    padding: 26px 38px;
+    background: rgba(59, 130, 214, 0.18);
+    font-size: 22px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: rgba(240, 240, 245, 0.6);
+  }
+  .sheet .row {
+    display: flex;
+    padding: 26px 38px;
+    background: rgba(37, 37, 64, 0.55);
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    font-size: 31px;
+  }
+  .sheet .c1 { flex: 0 0 300px; color: rgba(240, 240, 245, 0.4); }
+  .sheet .c2 { flex: 0 0 70px; color: var(--accent-light); }
+  .sheet .c3 { flex: 1 1 auto; color: var(--off-white); }
+
+  /* ---- terminal --------------------------------------------------------- */
+  .term {
+    position: absolute;
+    top: 50%;
+    left: 900px;
+    right: -110px;
+    transform: translateY(-50%);
+    border-radius: 14px; overflow: hidden; box-shadow: 0 30px 90px rgba(0, 0, 0, 0.55); border: 1px solid rgba(255, 255, 255, 0.08); }
+  .term .chrome {
+    height: 44px;
+    background: #2a2a3e;
+    background-image:
+      radial-gradient(circle at 26px 22px, #ff5f57 6.5px, transparent 7px),
+      radial-gradient(circle at 52px 22px, #ffbd2e 6.5px, transparent 7px),
+      radial-gradient(circle at 78px 22px, #28ca42 6.5px, transparent 7px);
+  }
+  .term .body {
+    background: #12121f;
+    padding: 42px 44px;
+    font-family: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+    font-size: 25px;
+    line-height: 2.0;
+  }
+  .term .prompt { color: var(--accent-light); }
+  .term .cmd { color: var(--off-white); }
+  .term .out { color: rgba(240, 240, 245, 0.45); }
+  .term .ok { color: #4ade80; }
+  .term .warn { color: var(--lime); }
+  .term .blank { display: block; height: 20px; }
+
+  /* ---- footer lockup --------------------------------------------------- */
+  .footer {
+    position: absolute;
+    left: 130px;
+    bottom: 62px;
+    z-index: 3;
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    font-size: 22px;
+    letter-spacing: 0.06em;
+    color: rgba(240, 240, 245, 0.4);
+  }
+  .footer img { width: 40px; height: 40px; border-radius: 9px; }
+  .footer b { color: rgba(240, 240, 245, 0.72); font-weight: 600; }
+
+  /* Only render the requested slide when screenshotting */
+  body.single .slide { display: none; }
+  body.single .slide.active { display: block; }
+
+  /* ---- side-by-side comparison (OAuth vs PAT) --------------------------- */
+  .versus { display: flex; gap: 26px; }
+  .vs-card {
+    flex: 1 1 0;
+    padding: 40px 36px;
+    border-radius: 18px;
+    background: rgba(37, 37, 64, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+  .vs-card.win { border-color: rgba(129, 221, 1, 0.45); background: rgba(59, 130, 214, 0.14); }
+  .vs-card .kind {
+    font-size: 24px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: rgba(240, 240, 245, 0.5);
+    margin-bottom: 22px;
+  }
+  .vs-card .life {
+    font-family: 'Jersey 20', sans-serif;
+    font-size: 96px;
+    line-height: 1;
+    color: #ff8f6b;
+  }
+  .vs-card.win .life { color: var(--lime); }
+  .vs-card .sub { font-size: 23px; line-height: 1.45; color: rgba(240, 240, 245, 0.5); margin-top: 18px; }
+
+  /* ---- totals comparison ------------------------------------------------ */
+  .ledger {
+    border-radius: 18px;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 30px 90px rgba(0, 0, 0, 0.5);
+  }
+  .ledger .line {
+    display: flex;
+    justify-content: space-between;
+    padding: 30px 40px;
+    background: rgba(37, 37, 64, 0.55);
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    font-size: 33px;
+  }
+  .ledger .line:first-child { border-top: 0; }
+  .ledger .line .k { color: rgba(240, 240, 245, 0.55); }
+  .ledger .line .v { color: var(--off-white); }
+  .ledger .line.sum { background: rgba(59, 130, 214, 0.18); font-size: 36px; }
+  .ledger .line.sum .v { color: var(--lime); }
+  .ledger .line.bad .v { color: #ff8f6b; }
+</style>
+</head>
+<body>
+
+<!-- 1 · Cover ============================================================ -->
+<section class="slide cover" data-n="1">
+  <div class="inner">
+    <div class="copy">
+      <div class="eyebrow"><span class="rule"></span> Craft Commerce 5 &nbsp;·&nbsp; Switzerland</div>
+      <h1 class="gradient-text">Bexy</h1>
+      <p class="tagline">bexio invoicing for Craft Commerce.</p>
+      <p class="lede">Orders become invoices, payments get posted, and bexio&rsquo;s verdict comes back.</p>
+      <div class="badges">
+        <span class="badge"><span class="dot"></span> $99 &nbsp;·&nbsp; one edition</span>
+        <span class="badge">Craft 5.3+ · Commerce 5 · PHP 8.2+</span>
+      </div>
+    </div>
+    <div class="mark"><img src="assets/icon.svg" alt=""></div>
+  </div>
+</section>
+
+<!-- 2 · The whole idea =================================================== -->
+<section class="slide statement" data-n="2">
+  <div class="inner">
+    <div class="eyebrow"><span class="rule"></span> The whole idea</div>
+    <div class="swap">
+      <span class="caption">Everyone gets the order into bexio</span>
+      <span class="before mono">Invoice created</span>
+      <span class="arrow"></span>
+      <span class="caption">Bexy does the half after that</span>
+      <span class="after mono gradient-text">Issued · Paid · Closed</span>
+    </div>
+    <p class="lede">The payment is posted so the invoice does not sit open, and bexio&rsquo;s status is pulled
+      back into Commerce &mdash; without ever inventing a transaction that did not happen.</p>
+  </div>
+  <div class="footer"><img src="assets/icon.svg" alt=""> <b>Bexy</b> &nbsp;·&nbsp; justinholt.com/plugins/craft-bexy</div>
+</section>
+
+<!-- 3 · The preview ====================================================== -->
+<section class="slide feature" data-n="3">
+  <div class="inner">
+    <div class="copy">
+      <div class="eyebrow"><span class="rule"></span> Before it sends</div>
+      <h2>See it<br>before<br>you send it</h2>
+      <p class="lede">The preview runs the same builder as the real push.</p>
+      <ul class="points">
+        <li><span class="tick"></span> One place in the code turns an order into a document</li>
+        <li><span class="tick"></span> So a preview is byte-for-byte what bexio receives</li>
+        <li><span class="tick"></span> It sends nothing</li>
+      </ul>
+    </div>
+  </div>
+  <div class="term">
+    <div class="chrome"></div>
+    <div class="body">
+      <div><span class="prompt">$</span> <span class="cmd">php craft bexy/sync/preview 1042</span></div>
+      <span class="blank"></span>
+      <div class="out">contact &nbsp;&nbsp;&nbsp;B&uuml;hler AG &nbsp;·&nbsp; #4471 <span class="ok">matched on email</span></div>
+      <div class="out">positions &nbsp;3 &times; KbPositionCustom, 1 &times; KbPositionArticle</div>
+      <div class="out">shipping &nbsp;&nbsp;CHF 12.00 &nbsp;·&nbsp; MWST 8.1% &nbsp;&rarr;&nbsp; 3400</div>
+      <div class="out">mwst_type &nbsp;0 &nbsp;<span class="warn">prices include tax, read from Commerce</span></div>
+      <span class="blank"></span>
+      <div class="out">document &nbsp;&nbsp;CHF 486.35</div>
+      <div class="out">order &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CHF 486.35</div>
+      <div class="out"><span class="ok">&check; totals agree &mdash; nothing to round</span></div>
+    </div>
+  </div>
+  <div class="footer"><img src="assets/icon.svg" alt=""> <b>Bexy</b> &nbsp;·&nbsp; justinholt.com/plugins/craft-bexy</div>
+</section>
+
+<!-- 4 · Totals =========================================================== -->
+<section class="slide feature" data-n="4">
+  <div class="inner">
+    <div class="copy">
+      <div class="eyebrow"><span class="rule"></span> Totals</div>
+      <h2>Caught here,<br>not in a<br>VAT return</h2>
+      <p class="lede">Bexy works out what bexio will make the document come to, and compares it with Commerce
+        before the request goes out.</p>
+      <ul class="points">
+        <li><span class="tick"></span> A cent-sized gap gets an untaxed rounding position</li>
+        <li><span class="tick"></span> A larger one is refused and explained</li>
+      </ul>
+    </div>
+  </div>
+  <div class="panel">
+    <div class="ledger">
+      <div class="line"><span class="k">Line items</span><span class="v mono">CHF 499.35</span></div>
+      <div class="line"><span class="k">Shipping</span><span class="v mono">CHF 12.00</span></div>
+      <div class="line"><span class="k">Discount</span><span class="v mono">&minus; CHF 25.00</span></div>
+      <div class="line"><span class="k">of which MWST 8.1% (included)</span><span class="v mono">CHF 36.44</span></div>
+      <div class="line sum"><span class="k">Document total</span><span class="v mono">CHF 486.35</span></div>
+    </div>
+    <p class="note">A mis-mapped 7.7% charge is a wrong tax mapping, not rounding.
+      Closing it with a line called &ldquo;Rounding&rdquo; would balance the document while it was still wrong,
+      so past <span class="mono">roundingLimit</span> Bexy refuses and says why.</p>
+  </div>
+  <div class="footer"><img src="assets/icon.svg" alt=""> <b>Bexy</b> &nbsp;·&nbsp; justinholt.com/plugins/craft-bexy</div>
+</section>
+
+<!-- 5 · Payments ========================================================= -->
+<section class="slide feature" data-n="5">
+  <div class="inner">
+    <div class="copy">
+      <div class="eyebrow"><span class="rule"></span> Payments</div>
+      <h2>Paid orders<br>stop sitting<br>open</h2>
+      <p class="lede">Every successful Commerce charge becomes a payment against the bexio invoice.</p>
+      <ul class="points">
+        <li><span class="tick"></span> Unique on the transaction, so never posted twice</li>
+        <li><span class="tick"></span> Refunds cancel where bexio permits it</li>
+      </ul>
+    </div>
+  </div>
+  <div class="panel">
+    <div class="step"><span class="num">1</span><span><span class="label">Order completes</span><span class="sub">A queue job is enqueued &mdash; the checkout never waits on bexio</span></span></div>
+    <div class="step"><span class="num">2</span><span><span class="label">Document created and issued</span><span class="sub">Searched for by api_reference first, so it cannot be created twice</span></span></div>
+    <div class="step"><span class="num">3</span><span><span class="label">Charge posted as a payment</span><span class="sub">The invoice closes in bexio the moment Commerce settles it</span></span></div>
+    <div class="step"><span class="num">4</span><span><span class="label">Status pulled back</span><span class="sub">Reconcile moves the Commerce order &mdash; the status only, never a fake transaction</span></span></div>
+  </div>
+  <div class="footer"><img src="assets/icon.svg" alt=""> <b>Bexy</b> &nbsp;·&nbsp; justinholt.com/plugins/craft-bexy</div>
+</section>
+
+<!-- 6 · The connection =================================================== -->
+<section class="slide feature" data-n="6">
+  <div class="inner">
+    <div class="copy">
+      <div class="eyebrow"><span class="rule"></span> The connection</div>
+      <h2>A token that<br>dies quietly<br>is worse than<br>no token</h2>
+      <p class="lede">bexio expires personal access tokens 60 days after they are created, without
+        telling anybody.</p>
+      <ul class="points">
+        <li><span class="tick"></span> OAuth 2.0 with PKCE, refresh tokens stored on every rotation</li>
+        <li><span class="tick"></span> Encrypted with Craft&rsquo;s security key</li>
+      </ul>
+    </div>
+  </div>
+  <div class="panel">
+    <div class="versus">
+      <div class="vs-card">
+        <div class="kind">Personal access token</div>
+        <div class="life">60 days</div>
+        <p class="sub">Then it stops, silently. Nothing in Commerce says so; you find out when the
+          quarter does not add up.</p>
+      </div>
+      <div class="vs-card win">
+        <div class="kind">OAuth 2.0</div>
+        <div class="life">Indefinite</div>
+        <p class="sub">Refresh tokens rotate, and Bexy stores the new one every time &mdash; which is
+          the step that makes the next refresh work.</p>
+      </div>
+    </div>
+    <p class="note">Bexy supports both. OAuth is the default for the reason on the left.</p>
+  </div>
+  <div class="footer"><img src="assets/icon.svg" alt=""> <b>Bexy</b> &nbsp;·&nbsp; justinholt.com/plugins/craft-bexy</div>
+</section>
+
+<!-- 7 · Console ========================================================== -->
+<section class="slide feature" data-n="7">
+  <div class="inner">
+    <div class="copy">
+      <div class="eyebrow"><span class="rule"></span> Operable</div>
+      <h2>Answers,<br>not guesses</h2>
+      <p class="lede">A doctor that tells you what will break before an order does, and a log with both
+        bodies and the secrets redacted.</p>
+      <ul class="points">
+        <li><span class="tick"></span> Console: doctor, sync, reconcile, meta</li>
+        <li><span class="tick"></span> English, German, French and Italian</li>
+      </ul>
+    </div>
+  </div>
+  <div class="term">
+    <div class="chrome"></div>
+    <div class="body">
+      <div><span class="prompt">$</span> <span class="cmd">php craft bexy/doctor</span></div>
+      <div class="out">Connection &nbsp;&nbsp;<span class="ok">&check; OAuth, refresh token valid</span></div>
+      <div class="out">Tax mapping <span class="warn">! general &rarr; falling back to the default tax</span></div>
+      <span class="blank"></span>
+      <div><span class="prompt">$</span> <span class="cmd">php craft bexy/sync/pending</span></div>
+      <div class="out">4 orders sent. <span class="ok">1 adopted an existing document.</span></div>
+      <span class="blank"></span>
+      <div><span class="prompt">$</span> <span class="cmd">php craft bexy/reconcile/run</span></div>
+      <div class="out">RE-2026-0188 paid in bexio &rarr; <span class="ok">Commerce order marked Completed</span></div>
+    </div>
+  </div>
+  <div class="footer"><img src="assets/icon.svg" alt=""> <b>Bexy</b> &nbsp;·&nbsp; justinholt.com/plugins/craft-bexy</div>
+</section>
+
+<script>
+  var n = new URLSearchParams(location.search).get('s');
+  if (n) {
+    document.body.classList.add('single');
+    var el = document.querySelector('.slide[data-n="' + n + '"]');
+    if (el) el.classList.add('active');
+  }
+</script>
+</body>
+</html>

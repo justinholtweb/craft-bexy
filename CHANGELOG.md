@@ -24,4 +24,5 @@ Initial release.
 - Connection log with both bodies and redacted secrets; retention pruning.
 - Console commands: `doctor`, `sync/order`, `sync/preview`, `sync/pending`, `sync/status`,
   `reconcile/run`, `meta/*`.
+- Control panel in English, German, French and Italian.
 - 139 integration checks.

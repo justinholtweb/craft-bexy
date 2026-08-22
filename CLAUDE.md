@@ -110,6 +110,22 @@ composer dist). The per-resource doc URLs 404; the SPA is the only source.
 - **`/Users/jholt/Sites` is itself an uncommitted git repo**, so a plugin folder must be
   `git init`ed before any `git add`.
 
+## The marketing site
+
+Lives at **`justinholt.com/plugins/craft-bexy`** in the shared install, in four languages, not on
+its own domain. The procedure is the `plugin-marketing-site` skill in that repo; what is specific
+to Bexy:
+
+- Bexy is the **first translated plugin site**, so the localization machinery there was built for
+  it: `config/routes.php` routes `/<lang>`, band copy resolves through
+  `translations/<lang>/plugin-craft-bexy.php`, and `docLocale` on `pluginDoc` scopes the docs.
+- **A locale is published when its docs exist.** `docs/fr/` is what makes `/plugins/craft-bexy/fr`
+  return 200 instead of 404; there is no field to tick.
+- The site accent is **`#3B82D6`**, not the icon's navy. Navy fails contrast as accent text on the
+  charcoal background (1.9:1); the lifted blue clears both uses.
+- `pluginStatus` is still `in-development` and `showOnSite`/`isListed` are `false`. Flip all three
+  at launch — `isListed` puts Bexy into `/plugins.json`, which 28 deployed sites read at runtime.
+
 Bexy sits in the accounting-integration family: `[[project_craft_sevvies]]` (sevDesk, DE),
 `[[project_craft_econz]]` (e-conomic, DK), `[[project_craft_knox]]` (Fortnox, SE),
 `[[project_craft_holding]]` (Holded, ES), `[[project_craft_datevz]]` (DATEV export, DE) —
@@ -119,6 +135,31 @@ whose conventions this follows.
 
 **Bexy differs from most of the family in having a single paid edition** — no `editions()`, no
 `isPro()`, no edition gates. Do not add one without being asked.
+
+## Icon, licence, docs and promos
+
+- **`src/icon.svg` is bexio's own `bx` mark**, white on bexio navy `#0D407E`, on the family's
+  `rx="22"` rounded tile. **`src/icon-mask.svg` is the same mark alone in `currentColor`** — the
+  two files are *not* interchangeable, and shipping the mask as the icon (which is what 5.0.0
+  nearly did) loses the tile everywhere the Plugin Store shows it.
+- **`LICENSE.md` is The Craft License**, byte-identical to the rest of the family bar the trailing
+  newline. A bespoke licence is not what the Plugin Store expects from a commercial plugin.
+  (`craft-sevvies` is still an outlier here.)
+- **`docs/*.md` is English; `docs/{de,fr,it}/*.md` are the translations.** Same `slug` in every
+  language — the URL is `/plugins/craft-bexy/<lang>/docs/<slug>` — and the same `order`. A file
+  without front matter is skipped, which is how `docs/plan.md` stays off the site.
+- **`promos/` renders the seven Plugin Store images**, `./build.sh`. Export-ignored, like `docs`
+  and `tests`.
+
+## Translations
+
+`src/translations/{en,de,fr,it}/bexy.php`, **246 strings each, all four in lockstep**. Every
+string that reaches `Craft::t('bexy', …)` or `|t('bexy')` is in all four files; adding a string to
+the code and only to `en` is the failure mode to watch for.
+
+- German is **Swiss** German: no `ß`, ever. `Grösse`, `muss`, `gemäss`.
+- Placeholders (`{number}`, `{amount}`), backtick spans and `[Network Link]` must survive
+  translation verbatim — they are read by code, not by people.
 
 ## Testing
 
